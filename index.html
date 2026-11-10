@@ -107,27 +107,87 @@ function renderResult(){
   const val=document.createElement('span');val.textContent=pct+'%';row.append(name,meter,val);holder.append(row)
  });el('toast').textContent='';
 }
-function resultText(){if(!final)return'';const d=final;return '【测测你是udg中的谁】\n测出来：'+d.p.name+'｜'+d.p.title+'\n'+d.p.desc+'\n危机应对：'+d.cm[0]+'\n隐藏副人格：'+d.runner.name+'\n（非官方娱乐测试；争议情境均为虚构）'}
+function resultText(){if(!final)return'';const d=final;return '【测测你是udg中的谁】\n测出来：'+d.p.name+'｜'+d.p.title+'\n'+d.p.desc+'\n危机应对：'+d.cm[0]+'\n隐藏副人格：'+d.runner.name+'\n开始测试：'+TEST_SHARE_URL+'\n（非官方娱乐测试；争议情境均为虚构）'}
 async function copyResult(){
  try{const s=resultText();if(navigator.clipboard&&window.isSecureContext)await navigator.clipboard.writeText(s);else{const t=document.createElement('textarea');t.value=s;t.style.position='fixed';t.style.left='-500vw';document.body.append(t);t.select();if(!document.execCommand('copy'))throw Error('copy');t.remove()}el('toast').textContent='结果已复制。'}catch(e){el('toast').textContent='浏览器阻止了复制，请截图分享。'}
 }
+// Share link and QR are embedded locally: the exported PNG works offline, too.
+const TEST_SHARE_URL = 'https://asuka041942.github.io/udg-test/';
+const TEST_SHARE_QR = ["00000000000000000000000000000000000000000","00000000000000000000000000000000000000000","00000000000000000000000000000000000000000","00000000000000000000000000000000000000000","00001111111001101101011001001011111110000","00001000001011011011101101000010000010000","00001011101001000000000011001010111010000","00001011101011111010001011000010111010000","00001011101010100100100001100010111010000","00001000001000100000111100110010000010000","00001111111010101010101010101011111110000","00000000000010111100000000000000000000000","00000101111011010010010000101110110100000","00000110100111111011110100010000111000000","00000010001001100101100011110110111110000","00000111010100101000001110101101001100000","00000111111011001111010000101010000010000","00001001000010001100011110010101001000000","00001110101011011110001111001010000000000","00001101100100000000000010100101001010000","00001010001110100011001010011111110000000","00001111110100010110001101000010101110000","00000011111100101010010110010011011010000","00001100010000110001010010100110111110000","00000000101100101000010101100001010110000","00001011010110110010000000110000110000000","00001010011010010000111111010010110110000","00001000010010111010111110010101001110000","00001110101000111000110000101111110010000","00000000000011011001010011111000101100000","00001111111001000111111100011010101000000","00001000001011111111001001111000111010000","00001011101011000111010001111111100110000","00001011101011001010110001100101010010000","00001011101001100101001101111001101110000","00001000001011011111111110100011111110000","00001111111001001011001110101011100000000","00000000000000000000000000000000000000000","00000000000000000000000000000000000000000","00000000000000000000000000000000000000000","00000000000000000000000000000000000000000"];
 function saveCard(){
  if(!final)return;
- const {p,runner,cm,total}=final;
+ const {p,runner,cm}=final;
  const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');
- if(!ctx){el('toast').textContent='无法生成结果图，请截图。';return}
- canvas.width=900;canvas.height=1150;
- const grad=ctx.createLinearGradient(0,0,900,1150);grad.addColorStop(0,'#293f21');grad.addColorStop(.5,'#111c12');grad.addColorStop(1,'#080d09');ctx.fillStyle=grad;ctx.fillRect(0,0,900,1150);
- ctx.fillStyle='#d1ff59';ctx.fillRect(57,60,8,69);ctx.font='bold 34px sans-serif';ctx.fillText('UDG / WHO R U?',85,107);ctx.font='22px sans-serif';ctx.fillStyle='#becbb6';ctx.fillText('33 位音乐人 · 14 道题',60,182);
- function print(s,x,y,size,color,maxWidth){ctx.font='900 '+size+'px sans-serif';while(size>24&&ctx.measureText(s).width>maxWidth){size-=2;ctx.font='900 '+size+'px sans-serif'}ctx.fillStyle=color;ctx.fillText(s,x,y)}
- function wrap(s,x,y,width,lh,maxLines,size,color){ctx.font=size+'px sans-serif';ctx.fillStyle=color;let line='',n=0;for(const ch of String(s)){if(ctx.measureText(line+ch).width>width&&line){ctx.fillText(line,x,y);y+=lh;line=ch;if(++n>=maxLines)return y}else line+=ch}if(line)ctx.fillText(line,x,y);return y+lh}
- print('你的地下人格是',60,265,36,'#e3eadd',770);print(p.name,58,377,76,'#d1ff59',780);print(p.title,60,440,31,'#ffffff',770);
- ctx.fillStyle='#45613a';ctx.fillRect(60,473,778,2);let y=527;y=wrap(p.desc,60,y,780,38,5,23,'#e0e9d8')+30;
- ctx.font='bold 28px sans-serif';ctx.fillStyle='#d1ff59';ctx.fillText('BEEF PERSONA',60,y);y+=48;y=wrap(p.beef,60,y,775,38,4,23,'#ffffff')+28;
- ctx.font='bold 28px sans-serif';ctx.fillStyle='#d1ff59';ctx.fillText('危机应对流派',60,y);y+=46;y=wrap(cm[0]+' · '+cm[1],60,y,780,36,4,22,'#ffffff');
- ctx.font='bold 26px sans-serif';ctx.fillStyle='#d1ff59';ctx.fillText('副人格：'+runner.name,60,1037);
- ctx.font='19px sans-serif';ctx.fillStyle='#a6baa0';ctx.fillText('非官方娱乐测试 · 虚构情境',60,1103);
- canvas.toBlob(blob=>{if(!blob){el('toast').textContent='无法生成图片，请截图。';return}const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='我的地下人格-'+p.name.replace(/[\\/:*?"<>|]/g,'')+'.png';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),2500);el('toast').textContent='结果卡已生成，手机上也可以直接截图保存。'},'image/png');
+ if(!ctx){el('toast').textContent='无法生成结果图片，请截图。';return}
+ const W=900,H=1510;
+ canvas.width=W;canvas.height=H;
+ const grad=ctx.createLinearGradient(0,0,W,H);
+ grad.addColorStop(0,'#293f21');grad.addColorStop(.50,'#111c12');grad.addColorStop(1,'#080d09');
+ ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
+ ctx.fillStyle='#d1ff59';ctx.fillRect(57,60,8,69);
+ ctx.font='bold 34px sans-serif';ctx.fillText('UDG / WHO R U?',85,107);
+ ctx.font='22px sans-serif';ctx.fillStyle='#becbb6';ctx.fillText('33 位音乐人 · 14 道题',60,182);
+ function print(s,x,y,size,color,maxWidth){
+  ctx.font='900 '+size+'px sans-serif';
+  while(size>24&&ctx.measureText(s).width>maxWidth){size-=2;ctx.font='900 '+size+'px sans-serif'}
+  ctx.fillStyle=color;ctx.fillText(s,x,y);
+ }
+ function wrap(s,x,y,width,lh,maxLines,size,color){
+  ctx.font=size+'px sans-serif';ctx.fillStyle=color;
+  const lines=[];let line='';
+  for(const ch of String(s)){
+   if(ctx.measureText(line+ch).width>width&&line){lines.push(line);line=ch}
+   else line+=ch;
+  }
+  if(line)lines.push(line);
+  const visible=lines.slice(0,maxLines);
+  if(lines.length>maxLines&&visible.length){
+   let last=visible.length-1;
+   while(visible[last].length&&ctx.measureText(visible[last]+'…').width>width){visible[last]=visible[last].slice(0,-1)}
+   visible[last]+='…';
+  }
+  visible.forEach((s,i)=>ctx.fillText(s,x,y+i*lh));
+ }
+ print('你的地下人格是',60,265,36,'#e3eadd',770);
+ print(p.name,58,377,76,'#d1ff59',780);
+ print(p.title,60,440,31,'#ffffff',770);
+ ctx.fillStyle='#45613a';ctx.fillRect(60,473,778,2);
+ wrap(p.desc,60,527,780,37,5,23,'#e0e9d8');
+ ctx.font='bold 27px sans-serif';ctx.fillStyle='#d1ff59';ctx.fillText('BEEF PERSONA',60,758);
+ wrap(p.beef,60,805,775,36,4,23,'#ffffff');
+ ctx.font='bold 27px sans-serif';ctx.fillStyle='#d1ff59';ctx.fillText('危机应对流派',60,975);
+ wrap(cm[0]+' · '+cm[1],60,1020,775,35,3,22,'#ffffff');
+ ctx.font='bold 26px sans-serif';ctx.fillStyle='#d1ff59';ctx.fillText('副人格：'+runner.name,60,1148);
+
+ // Dedicated referral area, separated from the user's personality results.
+ ctx.fillStyle='#d1ff59';ctx.fillRect(48,1181,804,3);
+ ctx.fillStyle='#141e14';ctx.fillRect(48,1195,804,270);
+ ctx.fillStyle='#d1ff59';ctx.font='900 29px sans-serif';
+ ctx.fillText('测测你是 UDG 中的谁',73,1260);
+ ctx.font='21px sans-serif';ctx.fillStyle='#e4ecdc';
+ ctx.fillText('扫码测出你的地下人格',73,1309);
+ ctx.fillStyle='#bac7b4';ctx.font='19px sans-serif';
+ ctx.fillText(TEST_SHARE_URL,73,1363);
+ ctx.font='16px sans-serif';ctx.fillStyle='#a9b79f';
+ ctx.fillText('非官方娱乐测试 · 争议情境均为虚构',73,1413);
+
+ // Render QR modules with integer coordinates for a sharp, reliably scannable code.
+ const n=TEST_SHARE_QR.length,unit=6,qrSize=n*unit;
+ const qrX=585,qrY=1205;
+ ctx.fillStyle='#ffffff';ctx.fillRect(qrX-7,qrY-7,qrSize+14,qrSize+14);
+ ctx.fillStyle='#000000';
+ for(let row=0;row<n;row++){
+  const bits=TEST_SHARE_QR[row];
+  for(let col=0;col<n;col++)if(bits[col]==='1')ctx.fillRect(qrX+col*unit,qrY+row*unit,unit,unit);
+ }
+ canvas.toBlob(blob=>{
+  if(!blob){el('toast').textContent='无法生成图片，请截图。';return}
+  const objUrl=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=objUrl;a.download='我的地下人格-'+p.name.replace(/[\\/:*?"<>|]/g,'')+'.png';
+  document.body.append(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(objUrl),5000);
+  el('toast').textContent='结果图片已生成，底部附有测试网址及二维码。';
+ },'image/png');
 }
 renderRoster();el('search').addEventListener('input',renderRoster);
 el('startBtn').onclick=()=>{answers=[];pos=0;renderQuestion()};el('backBtn').onclick=()=>{if(pos>0){pos--;renderQuestion()}};el('quitBtn').onclick=()=>show('start');
